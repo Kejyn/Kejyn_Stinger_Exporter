@@ -1,130 +1,102 @@
 # Kejyn Stinger Exporter
 
-Petit outil Windows pour prévisualiser une transition HTML/CSS/JS et l'exporter en **WebM VP9 transparent + audio Opus**, prêt pour les **Stinger Transitions OBS**.
+A lightweight Windows tool for previewing HTML/CSS/JavaScript stinger transitions and exporting them as transparent WebM files for OBS.
 
-## Fonctionnalités
+Supports optional audio, custom resolutions, frame rates and export settings.
 
-- Sélection séparée du HTML, CSS et JavaScript.
-- Son optionnel.
-- Réglage du volume.
-- Fade audio de fin.
-- Prévisualisation Chromium.
-- Export 1920×1080 / 60 FPS ou valeurs personnalisées.
-- VP9 + canal alpha `yuva420p`.
-- Installation Windows propre via **Inno Setup**.
-- Chromium Playwright embarqué dans l'installation : l'utilisateur final n'a ni Python, ni Playwright, ni FFmpeg à installer.
+## Features
 
-## Utilisateur final
+- Preview HTML/CSS/JavaScript transitions directly in Chromium
+- Export transparent WebM videos for OBS
+- VP9 video with alpha transparency
+- Optional audio with volume control and fade-out
+- Custom resolution, frame rate and duration
+- Deterministic frame-by-frame rendering
+- Simple Windows interface
+- Standalone Windows installer
 
-Une release GitHub contient simplement :
+## Installation
 
-```text
-KejynStingerExporter-Setup-1.0.0.exe
-```
-
-Il suffit de lancer l'installateur.
-
-Installation par utilisateur dans :
+Download the latest Windows installer from the **Releases** section:
 
 ```text
-%LOCALAPPDATA%\Programs\Kejyn Stinger Exporter
+KejynStingerExporter-Setup-x.x.x.exe
 ```
 
-Aucun droit administrateur n'est nécessaire.
+Run the installer, then launch **Kejyn Stinger Exporter** from the Start menu.
 
-L'installateur ajoute :
-- l'application ;
-- Chromium nécessaire au rendu ;
-- FFmpeg fourni par `imageio-ffmpeg` ;
-- le raccourci du menu Démarrer ;
-- un raccourci Bureau optionnel ;
-- un désinstalleur Windows standard.
+No separate Python, Chromium or FFmpeg installation is required.
 
-## Développement
+## Usage
 
-### Lancer depuis les sources
+1. Select your HTML file.
+2. Select the associated CSS and JavaScript files.
+3. Optionally select an audio file.
+4. Configure the resolution, FPS, duration and audio settings.
+5. Click **Jouer la prévisu** to preview the transition.
+6. Click **Exporter en WebM** to generate the final file.
+7. Import the resulting `.webm` as a **Stinger Transition** in OBS.
+
+## Transition format
+
+For deterministic frame-by-frame export, the JavaScript transition must expose:
+
+```js
+window.renderTransition = renderTransition;
+```
+
+The renderer must accept a progress value between `0` and `1`:
+
+```js
+function renderTransition(progress) {
+    // Render the transition at the requested progress.
+}
+```
+
+This allows the exporter to render every frame independently instead of recording the animation in real time.
+
+## Development
+
+### Requirements
+
+- Python 3.11+
+- Inno Setup 6 — only required to build the Windows installer
+
+### Run from source
 
 ```bat
 scripts\run_dev.bat
 ```
 
-### Construire l'installateur localement
-
-Pré-requis :
-- Python 3.11+
-- Inno Setup 6
-
-Puis :
+### Build the Windows installer
 
 ```bat
 scripts\build_windows_installer.bat
 ```
 
-Le script :
-1. crée un environnement Python ;
-2. installe les dépendances ;
-3. télécharge Chromium ;
-4. construit l'application avec PyInstaller ;
-5. construit l'installateur Inno Setup.
-
-Résultat :
+The generated installer will be available in:
 
 ```text
-release\KejynStingerExporter-Setup-1.0.0.exe
+release/
 ```
 
-## Releases GitHub automatiques
+## Releases
 
-Le workflow :
+Windows builds are generated automatically through GitHub Actions when a version tag is pushed.
 
-```text
-.github/workflows/windows-release.yml
-```
-
-construit automatiquement le `Setup.exe`.
-
-Pour publier une version :
+Example:
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-GitHub Actions :
-- compile l'application sur Windows ;
-- embarque Chromium ;
-- construit l'installateur ;
-- ajoute automatiquement le `.exe` à la GitHub Release.
+The resulting installer is automatically attached to the corresponding GitHub Release.
 
-Le workflow peut aussi être lancé manuellement depuis l'onglet **Actions**.
+## License
 
-## Format attendu d'une transition
+This project is licensed under the **GNU General Public License v3.0**.
 
-Le JavaScript doit exposer :
+See the [LICENSE](LICENSE) file for details.
 
-```js
-window.renderTransition = renderTransition;
-```
-
-avec :
-
-```js
-renderTransition(progress)
-```
-
-où `progress` va de `0` à `1`.
-
-La transition KejynDev actuelle respecte déjà cette convention.
-
-## Réglages conseillés pour la transition KejynDev
-
-```text
-Résolution : 1920 × 1080
-FPS        : 60
-Durée      : 1800 ms
-Volume     : 65 %
-Fade audio : 250 ms
-CRF VP9    : 18
-```
-
-Pour OBS, le point de transition est autour de `900 ms`.
+Copyright © 2026 Kejyn.
